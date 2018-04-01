@@ -1,0 +1,191 @@
+<html>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>BMP Creator</title>
+        <style type="text/css">
+        * {
+            font-family: Courier;
+        }
+
+        body {
+            margin: 5px;
+            font-size: 10px;
+        }
+
+        #tableBmpCanvas {
+            border-collapse: collapse;
+        }
+
+        #tableBmpCanvas td {
+            border: 1px solid #000000;
+            font-size: 8px;
+            height: 10px;
+            width: 10px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        </style>
+
+        <script src="jquery-3.3.1.min.js"></script>
+
+        <script type="text/javascript">
+        var canvasCreated = false;
+        var canvasCount =3
+        var bmpWidth = 10;
+        var bmpHeight = 6;
+        var pixelMapArray = [];
+
+        $(document).ready(function() {
+            $("#txtBmpWidth").val(bmpWidth);
+            $("#txtBmpHeight").val(bmpHeight);
+
+            $("#btnCreateCanvas").on("click", function() {
+                if (canvasCreated) {
+                    if (!confirm("Canvas already created. Do you want to clear the canvas and create new?")) {
+                        return;
+                    } else {
+                        clearCanvas();
+                    }
+                }
+
+                bmpWidth = $("#txtBmpWidth").val().trim() || 0;
+                bmpHeight = $("#txtBmpHeight").val().trim() || 0;
+
+                if (bmpWidth == 0 || bmpHeight == 0 || !$.isNumeric(bmpWidth) || !$.isNumeric(bmpHeight)) {
+                    alert("Width/Height must be numeric and greater than zero!")
+                } else {
+                    createCanvas(bmpWidth, bmpHeight);
+                    canvasCreated = true;
+                    initPixelMapArray(bmpWidth, bmpHeight);
+                    $("#txtBmpCode1").prop("cols", parseInt(bmpWidth) + 5).prop("rows", parseInt(bmpHeight) + 2);
+                    showBinaryCode('txtBmpCode1');
+                }
+            }); // end btnCreateCanvas click
+
+            $("#btnClearCanvas").on("click", function() {
+                if (canvasCreated) {
+                    if (confirm("Are you sure to clear the canvas?")) {
+                        clearCanvas();
+                    }
+                } else {
+                    alert("No Canvas found");
+                }
+            }); // end event btnClearCanvas click
+        }); // end function document is ready
+
+        function initPixelMapArray(bmpWidth, bmpHeight) {
+            pixelMapArray = new Array(bmpHeight);
+            for (var i = 0; i < bmpHeight; i++) {
+                pixelMapArray[i] = new Array(bmpWidth);
+                for (j = 0; j < bmpWidth; j++) {
+                    pixelMapArray[i][j] = 0;
+                }
+            }
+        }; // end function initPixelMapArray
+
+        function updatePixelMapArray(pixelCellId) {
+            var arr = pixelCellId.split("-");
+            var y = arr[1];
+            var x = arr[2];
+
+            //update pixel map
+            pixelMapArray[x][y] = pixelMapArray[x][y] == 1 ? 0 : 1;
+
+            // flip pixel color
+            if (pixelMapArray[x][y])
+                $("#" + pixelCellId).css('background-color', '#000000');
+            else
+                $("#" + pixelCellId).css('background-color', '#ffffff');
+
+        }; // end function updatePixelMapArray
+
+        function showBinaryCode(textAreaId) {
+            txtArea = $("#" + textAreaId);
+            var rowBinCode = "";
+            var binCodeMatrix = "";
+            for (x = 0; x < bmpHeight; x++) {
+                for (y = 0; y < bmpWidth; y++) {
+                    rowBinCode = rowBinCode + pixelMapArray[x][y]
+                }
+                if (binCodeMatrix != "") binCodeMatrix += ",\n";
+                binCodeMatrix = binCodeMatrix + "0b" + rowBinCode;
+                rowBinCode = "";
+            }
+            txtArea.val(binCodeMatrix);
+        }; // end function showBinaryCode
+
+        function createCanvas(width, height) {
+            $("#divEditor").append('<table id="tableBmpCanvas"></table>');
+            for (j = 0; j < height; j++) {
+                row = document.getElementById("tableBmpCanvas").insertRow(j);
+                for (i = 0; i < width; i++) {
+                    var cell = row.insertCell(i);
+
+                    var idn = "pixel-" + i + "-" + j;
+                    cell.id = idn;
+                    cell.title = idn;
+                    cell.bgColor = "#ffffff";
+
+                    var mouseDownReleased = true;
+
+                    $(cell).bind("mousedown", function() {
+                        updatePixelMapArray(this.id);
+                        showBinaryCode('txtBmpCode1');
+                        mouseDownReleased = false;
+                    });
+
+                    $(cell).bind("mouseup", function() {
+                        mouseDownReleased = true;
+                    });
+                    $(cell).bind("mouseover", function() {
+                        $("#lblPixelUnderCursor").text(this.id);
+                        if (!mouseDownReleased) {
+                            updatePixelMapArray(this.id);
+                            showBinaryCode('txtBmpCode1');
+                        }
+                    });
+
+                    $(cell).bind("mouseout", function() {
+                        $("#lblPixelUnderCursor").text("");
+                    });
+                } // i width
+            } // j height
+        } // // end function createCanvas
+
+        function clearCanvas() {
+            canvasCreated = false;
+            pixelMapArray = [
+                []
+            ];
+            pixelMapArray.length = 0;
+            $("#tableBmpCanvas").remove();
+            $("#txtBmpCode1").val("");
+        }
+
+        </script>
+    </head>
+
+    <body>
+        <div>
+            <label>W:</label>
+            <input type="text" id="txtBmpWidth">
+            <label>H:</label>
+            <input type="text" id="txtBmpHeight">
+            <button id="btnCreateCanvas">Create Canvas</button>
+            <button id="btnClearCanvas">Clear Canvas</button>
+            <button id="btnSaveCanvas">Save Canvas</button>
+            <button id="btnLoadCanvas">Load Canvas</button>
+            <button id="btnCreateHexArray">Create HEX Array</button>
+            <label id="lblPixelUnderCursor">&nbsp</label>
+        </div>
+        <hr>
+        <div id="divEditor"></div>
+        <hr>
+        <div>
+            <textarea id="txtBmpCode1" readonly=""></textarea>
+        </div>
+    </body>
+
+</html>
