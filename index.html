@@ -13,11 +13,13 @@
             font-size: 10px;
         }
 
-        #tableBmpCanvas {
+        #tableBmpCanvas1, #tableBmpCanvas2 {
             border-collapse: collapse;
+            display: inline-block;
+            margin-right: 10px; 
         }
 
-        #tableBmpCanvas td {
+        #tableBmpCanvas1 td, #tableBmpCanvas2 td {
             border: 1px solid #000000;
             font-size: 8px;
             height: 10px;
@@ -25,7 +27,9 @@
             text-align: center;
             cursor: pointer;
         }
-
+        #txtBmpCode1, #txtBmpCode2 {
+            margin-right: 10px;
+        }
         </style>
 
         <script src="jquery-3.3.1.min.js"></script>
@@ -36,6 +40,7 @@
         var bmpWidth = 10;
         var bmpHeight = 6;
         var pixelMapArray = [];
+        var pixelMapArrayCont = [];
 
         $(document).ready(function() {
             $("#txtBmpWidth").val(bmpWidth);
@@ -60,7 +65,9 @@
                     canvasCreated = true;
                     initPixelMapArray(bmpWidth, bmpHeight);
                     $("#txtBmpCode1").prop("cols", parseInt(bmpWidth) + 5).prop("rows", parseInt(bmpHeight) + 2);
-                    showBinaryCode('txtBmpCode1');
+                    $("#txtBmpCode2").prop("cols", parseInt(bmpWidth) + 5).prop("rows", parseInt(bmpHeight) + 2);
+                    showBinaryCode('tableBmpCanvas1', 'txtBmpCode1');
+                    showBinaryCode('tableBmpCanvas2', 'txtBmpCode2');
                 }
             }); // end btnCreateCanvas click
 
@@ -73,6 +80,10 @@
                     alert("No Canvas found");
                 }
             }); // end event btnClearCanvas click
+
+
+            $( "#btnCreateCanvas" ).trigger( "click" );
+
         }); // end function document is ready
 
         function initPixelMapArray(bmpWidth, bmpHeight) {
@@ -83,31 +94,39 @@
                     pixelMapArray[i][j] = 0;
                 }
             }
+            pixelMapArrayCont[0] = pixelMapArray;
+            pixelMapArrayCont[1] = pixelMapArray;
+            pixelMapArrayCont[2] = pixelMapArray;
+
         }; // end function initPixelMapArray
 
-        function updatePixelMapArray(pixelCellId) {
-            var arr = pixelCellId.split("-");
+        function updatePixelMapArray(tableId, pixelCellClass) {
+            var arr = pixelCellClass.split("-");
             var y = arr[1];
             var x = arr[2];
+            var tid = parseInt(tableId.split("Canvas")[1])-1;;
+
 
             //update pixel map
-            pixelMapArray[x][y] = pixelMapArray[x][y] == 1 ? 0 : 1;
+            pixelMapArrayCont[tid][x][y] = pixelMapArrayCont[tid][x][y] == 1 ? 0 : 1;
 
             // flip pixel color
-            if (pixelMapArray[x][y])
-                $("#" + pixelCellId).css('background-color', '#000000');
+            if (pixelMapArrayCont[tid][x][y])
+                $("#" + tableId + " ." + pixelCellClass).css('background-color', '#000000');
             else
-                $("#" + pixelCellId).css('background-color', '#ffffff');
+                $("#" + tableId + " ." + pixelCellClass).css('background-color', '#ffffff');
 
         }; // end function updatePixelMapArray
 
-        function showBinaryCode(textAreaId) {
+        function showBinaryCode(tableId,textAreaId) {
             txtArea = $("#" + textAreaId);
+            var tid = parseInt(tableId.split("Canvas")[1])-1;
+
             var rowBinCode = "";
             var binCodeMatrix = "";
             for (x = 0; x < bmpHeight; x++) {
                 for (y = 0; y < bmpWidth; y++) {
-                    rowBinCode = rowBinCode + pixelMapArray[x][y]
+                    rowBinCode = rowBinCode + pixelMapArrayCont[tid][x][y]
                 }
                 if (binCodeMatrix != "") binCodeMatrix += ",\n";
                 binCodeMatrix = binCodeMatrix + "0b" + rowBinCode;
@@ -117,33 +136,43 @@
         }; // end function showBinaryCode
 
         function createCanvas(width, height) {
-            $("#divEditor").append('<table id="tableBmpCanvas"></table>');
+            $("#divEditor").append('<table id="tableBmpCanvas1"></table>');
+            $("#divEditor").append('<table id="tableBmpCanvas2"></table>');
+            populateCanvasPixel(width, height, 'tableBmpCanvas1', 'txtBmpCode1');
+            populateCanvasPixel(width, height, 'tableBmpCanvas2', 'txtBmpCode2');
+
+        } // // end function createCanvas
+
+
+function populateCanvasPixel(width, height, tableId, txtBmpCodeId) {
             for (j = 0; j < height; j++) {
-                row = document.getElementById("tableBmpCanvas").insertRow(j);
+                row = document.getElementById(tableId).insertRow(j);
                 for (i = 0; i < width; i++) {
                     var cell = row.insertCell(i);
 
                     var idn = "pixel-" + i + "-" + j;
-                    cell.id = idn;
+                    // cell.id = idn;
+                    cell.className = idn;
                     cell.title = idn;
                     cell.bgColor = "#ffffff";
 
                     var mouseDownReleased = true;
 
                     $(cell).bind("mousedown", function() {
-                        updatePixelMapArray(this.id);
-                        showBinaryCode('txtBmpCode1');
+                        updatePixelMapArray(tableId, this.className);
+                        showBinaryCode(tableId, txtBmpCodeId);
                         mouseDownReleased = false;
                     });
 
                     $(cell).bind("mouseup", function() {
                         mouseDownReleased = true;
                     });
+
                     $(cell).bind("mouseover", function() {
-                        $("#lblPixelUnderCursor").text(this.id);
+                        $("#lblPixelUnderCursor").text(this.className);
                         if (!mouseDownReleased) {
-                            updatePixelMapArray(this.id);
-                            showBinaryCode('txtBmpCode1');
+                            updatePixelMapArray(tableId, this.className);
+                            showBinaryCode(tableId, txtBmpCodeId);
                         }
                     });
 
@@ -152,16 +181,21 @@
                     });
                 } // i width
             } // j height
-        } // // end function createCanvas
+
+
+}
+
 
         function clearCanvas() {
             canvasCreated = false;
-            pixelMapArray = [
+            pixelMapArrayCont = [
                 []
             ];
-            pixelMapArray.length = 0;
-            $("#tableBmpCanvas").remove();
+            pixelMapArrayCont.length = 0;
+            $("#tableBmpCanvas1").remove();
+            $("#tableBmpCanvas2").remove();
             $("#txtBmpCode1").val("");
+            $("#txtBmpCode2").val("");
         }
 
         </script>
@@ -184,7 +218,8 @@
         <div id="divEditor"></div>
         <hr>
         <div>
-            <textarea id="txtBmpCode1" readonly=""></textarea>
+            <textarea id="txtBmpCode1"></textarea>
+            <textarea id="txtBmpCode2"></textarea>
         </div>
     </body>
 

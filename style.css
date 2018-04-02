@@ -1,0 +1,40 @@
+* {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+
+body {
+  font-size:.8em;
+  margin:5px;
+    padding: 0;
+    
+}
+
+.divCanvasContainer {
+    float: left;
+    border: 1px dotted silver;
+}
+
+.tableCanvas{
+  border-collapse: collapse;
+}
+
+.tableCanvas td {
+  border: 1px solid #000000;
+  font-size: 8px;
+  height: 10px;
+  width: 10px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.txtBmpSize {
+  width: 40px;
+}
+
+.glow {
+  background-color: #000000;
+}
+.noglow {
+  background-color: #ffffff;
+}

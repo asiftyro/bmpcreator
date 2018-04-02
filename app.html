@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>BMP Creator</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="jquery-3.3.1.min.js"></script>
+  <script src="script.js"></script>
+
+</head>
+
+<body>
+  <div>
+    <h4>BMP Creator</h4>
+    <hr>
+    <div class="">
+        <label>W:</label><input type="text" id="txtBmpWidth" class="txtBmpSize"><label>px</label>
+        <label>H:</label><input type="text" id="txtBmpHeight" class="txtBmpSize"><label>px</label>
+        <button id="btnCreateCanvas">Create New Bmp</button>
+        <label id="lblPixelUnderCursor">&nbsp</label>
+    </div>
+    <hr>
+    <div class="divCanvasContainer">
+      <table class="tableCanvas">
+        <tr>
+          <td>01</td>
+          <td>02</td>
+          <td>03</td>
+        </tr>
+        <tr>
+          <td>01</td>
+          <td>02</td>
+          <td>03</td>
+        </tr>
+        <tr>
+          <td>01</td>
+          <td>02</td>
+          <td>03</td>
+        </tr>
+      </table>
+      <br>
+      <textarea name="" id="" cols="10" rows="10"></textarea>
+      <br>
+      <button id="btnClearCanvas">Clear BMP Canvas</button>
+      <br>
+        <button id="btnSaveCanvas">Save BMP to File</button>
+        <br>
+        <button id="btnLoadCanvas">Load BMP from file</button>
+    </div>
+  </div>
+</body>
+
+</html>
