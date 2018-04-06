@@ -194,6 +194,8 @@ function clearCanvas(canvasId) {
   $("#table-animation tr").remove();
   $("#txtarea-canvas-0").val("");
   $("#txtarea-canvas-1").val("");
+  $("#txtarea-canvas-0").css('color', "#000000");
+  $("#txtarea-canvas-1").css('color', "#000000");
 }; // end function clearCanvas
 
 
