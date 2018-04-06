@@ -17,38 +17,35 @@
     <h4>BMP Creator</h4>
     <hr>
     <div class="">
-        <label>W:</label><input type="text" id="txtBmpWidth" class="txtBmpSize"><label>px</label>
-        <label>H:</label><input type="text" id="txtBmpHeight" class="txtBmpSize"><label>px</label>
-        <button id="btnCreateCanvas">Create New Bmp</button>
-        <label id="lblPixelUnderCursor">&nbsp</label>
+      <label>W:</label>
+      <input type="text" id="txtBmpWidth" class="txtBmpSize" value="3">
+      <label>px</label>
+      <label>H:</label>
+      <input type="text" id="txtBmpHeight" class="txtBmpSize" value="2">
+      <label>px</label>
+      <button id="btnCreateNewCanvas">Create New Bmp</button>
+      <button id="btnAnimate">Animate</button>
+      <label id="lblPixelUnderCursor">&nbsp;</label>
     </div>
     <hr>
+
+    <div class="divAnimationContainer">
+      <table class="tableCanvas" id="table-animation"></table>
+      </table>
+
+    </div>
+    <br>
     <div class="divCanvasContainer">
-      <table class="tableCanvas">
-        <tr>
-          <td>01</td>
-          <td>02</td>
-          <td>03</td>
-        </tr>
-        <tr>
-          <td>01</td>
-          <td>02</td>
-          <td>03</td>
-        </tr>
-        <tr>
-          <td>01</td>
-          <td>02</td>
-          <td>03</td>
-        </tr>
+      <table class="tableCanvas" id="table-canvas-0"></table>
       </table>
       <br>
-      <textarea name="" id="" cols="10" rows="10"></textarea>
+      <textarea name="" id="txtarea-canvas-0" class="text-area-canvas" cols="10" rows="10"></textarea>
+    </div>
+    <div class="divCanvasContainer">
+      <table class="tableCanvas" id="table-canvas-1"></table>
+      </table>
       <br>
-      <button id="btnClearCanvas">Clear BMP Canvas</button>
-      <br>
-        <button id="btnSaveCanvas">Save BMP to File</button>
-        <br>
-        <button id="btnLoadCanvas">Load BMP from file</button>
+      <textarea name="" id="txtarea-canvas-1" class="text-area-canvas" cols="10" rows="10"></textarea>
     </div>
   </div>
 </body>

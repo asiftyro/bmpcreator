@@ -4,64 +4,221 @@ let canvasCreated = false;
 let canvasCount = 2;
 let pixelMaps = [];
 let pixelMap = [];
-
+let currentCanvas = 0;
+let animating = false;
+let animationHandler;
+let animationCurrentFrame = 0;
 
 $(document).ready(function () {
-  $("#btnCreateCanvas").click(function () {
-    
 
+  $("#btnAnimate").click(function () {
+    if (!canvasCreated) {
+      alert("Found no canvas/frame")
+      return;
+    }
+
+    if (!animating) {
+      $("#btnAnimate").html("Stop Animation");
+      $(".divAnimationContainer").show();
+      animationHandler = setInterval(animate, 50);
+      animating = true;
+    } else {
+      $("#btnAnimate").html("Animate");
+      $(".divAnimationContainer").hide();
+      animating = false;
+      animationCurrentFrame = 0;
+      clearInterval(animationHandler);
+    }
+  });
+
+
+  $("#btnCreateNewCanvas").click(function () {
+    if (animating) {
+      alert("Please stop Animation first");
+      return;
+    }
+    if (canvasCreated) {
+      if (!confirm("Canvas already created. Do you want to clear the canvas and create new?")) {
+        return;
+      } else {
+        clearCanvas();
+      }
+    } // end if canvasCreated
     bmpWidth = $("#txtBmpWidth").val().trim() || 0;
     bmpHeight = $("#txtBmpHeight").val().trim() || 0;
-
+    // bmpWidth = 4;
+    // bmpHeight = 4;
+    // let sampleMap = ["0b0001,0b0010,0b0100,0b1000", "0b1000,0b0100,0b0010,0b0001"];
     if (bmpWidth == 0 || bmpHeight == 0 || !$.isNumeric(bmpWidth) || !$.isNumeric(bmpHeight)) {
       alert("Width/Height must be numeric and greater than zero!")
     } else {
       canvasCreated = true;
-      initEmptyPixelMapArr(bmpWidth, bmpHeight);
+      for (c = 0; c < canvasCount; c++) {
+        // initPixelMap(bmpWidth, bmpHeight, c, sampleMap[c]);
+        initPixelMap(bmpWidth, bmpHeight, c); // init pixel map array with zero value
+        createNewBmpCanvas(bmpWidth, bmpHeight, c); //init canvas table 
+        updateBmpCanvas(c); //  update canvas table from pixel map array
+      }
     }
+  }); // end event click btnCreateNewCanvas
 
-  });
-});
+  $(".text-area-canvas").on("keyup", function () {
+    textToPixMapArr(this.id);
+    updateBmpCanvas(this.id.split("-")[2]);
+  }); // end event keyup text-area-canvas
+
+}); // end document ready
 
 
 function createNewBmpCanvas(width, height, canvasId) {
+  for (j = 0; j < height; j++) {
+    let tableId = "table-canvas-" + canvasId;
+    row = document.getElementById(tableId).insertRow(j);
+    for (i = 0; i < width; i++) {
+      var cell = row.insertCell(i);
+      var pixelCellClass = "pixel-" + i + "-" + j;
+      cell.className = pixelCellClass;
+      cell.title = i + "," + j;
+      cell.bgColor = "#ffffff"; // initial cell color is white
+      let colr = pixelMaps[canvasId][j][i] == 1 ? "#000000" : "#ffffff"; // determine canvas table cell color
+      $("#" + tableId + " ." + pixelCellClass).css('background-color', colr); // update canvas table cell color
+      pixMapArrToText(canvasId); // update canvas code textarea
 
-}
+      let mouseDownReleased = true;
 
-function editBmp(canvasId) {
+      $(cell).bind("click", function () {
+        updateBmpCodes(canvasId, this.className);
+        updateBmpCanvas(canvasId);
+        pixMapArrToText(canvasId);
+      }); // end event binding click
 
-}
 
-function updateBmpCodes(canvasId) {
+      // $(cell).bind("mousedown", function () {
+      //   updateBmpCodes(canvasId, this.className);
+      //   updateBmpCanvas(canvasId);
+      //   pixMapArrToText(canvasId);
+      //   mouseDownReleased = false;
+      // });
 
-}
+      // $(cell).bind("mouseup", function () {
+      //   mouseDownReleased = true;
+      // });
 
+      // $(cell).bind("mouseover", function () {
+      //   $("#lblPixelUnderCursor").text(this.className);
+      //   if (!mouseDownReleased) {
+      //     updateBmpCodes(canvasId, this.className);
+      //     updateBmpCanvas(canvasId);
+      //     pixMapArrToText(canvasId);
+      //   }
+      // });
+
+      $(cell).bind("mouseout", function () {
+        $("#lblPixelUnderCursor").text("");
+      });
+
+    } // i width
+  } // j height
+}; // end function createNewBmpCanvas
+
+// canvas table to pixel map array
+function updateBmpCodes(canvasId, className) {
+  let pixelLabel = className.split('-');;
+  let y = pixelLabel[1];
+  let x = pixelLabel[2];
+  pixelMaps[canvasId][x][y] = pixelMaps[canvasId][x][y] == 1 ? 0 : 1;
+  // console.log(pixelMaps[canvasId][x][y]);
+}; // end function updateBmpCodes
+
+// pixel map array to canvas table 
 function updateBmpCanvas(canvasId) {
-
-}
-function loadBmpCodeFile(canvasId, filename) {
-
-}
-
-function clearCanvas(canvasId) {
-
-}
-
-function saveBmpCodeFile(canvasId, filename) {
-
-}
-
-function initPixelMap(bmpWidth, bmpHeight, pixelMapStr="") {
-  let initWith = 0;
-  pixelMap = new Array(bmpHeight);
-  for (var i = 0; i < bmpHeight; i++) {
-    pixelMap[i] = new Array(bmpWidth);
-    for (j = 0; j < bmpWidth; j++) {
-      pixelMap[i][j] = initWith;
+  let colr = ["#ffffff", "#000000"];
+  for (x = 0; x < bmpWidth; x++) {
+    for (y = 0; y < bmpHeight; y++) {
+      $("#table-canvas-" + canvasId + " ." + "pixel-" + x + "-" + y).css('background-color', colr[pixelMaps[canvasId][y][x]]);
     }
   }
+}; // end function updateBmpCanvas
+
+
+function animate() {
+  $("#table-animation tr").remove();
+  $("#table-animation").html($("#table-canvas-" + animationCurrentFrame).html());
+  animationCurrentFrame = animationCurrentFrame == 0 ? 1 : 0;
+}; // end function updateBmpCanvas
+
+function pixMapArrToText(canvasId) {
+  let fullText = ""
+  for (x = 0; x < bmpHeight; x++) {
+    let textLine = "";
+    for (y = 0; y < bmpWidth; y++) {
+      textLine += "" + pixelMaps[canvasId][x][y];
+    }
+    if (fullText != "") fullText += ",\n";
+    fullText += "0b" + textLine;
+    $("#txtarea-canvas-" + canvasId).val(fullText);
+  }
+}; // end function pixMapArrToText
+
+function textToPixMapArr(canvasCodetextAreaId) {
+
+  fullText = $("#" + canvasCodetextAreaId).val().replace(/0b/g, "").replace(/\n/g, "");
+  fullTextLen = fullText.replace(/,/g, "").length;
+  scanLines = fullText.split(",");
+
+
+  if (fullTextLen != bmpHeight * bmpWidth) {
+    $("#" + canvasCodetextAreaId).css('color', "#ff0000");
+    return;
+  } else {
+    $("#" + canvasCodetextAreaId).css('color', "#000000");
+  }
+
+  for (i = 0; i < scanLines.length; i++) {
+    for (j = 0; j < scanLines[i].length; j++) {
+      pixelMaps[canvasCodetextAreaId.split("-")[2]][i][j] = scanLines[i][j];
+    }
+  }
+  // console.log(scanLines);
+  // console.log(pixelMaps);
+}; // end function textToPixMapArr
+
+function clearCanvas(canvasId) {
+  canvasCreated = false;
+  pixelMaps = [];
+  pixelMap = [];
+  pixelMaps.length = 0;
+  pixelMap.length = 0;
+  $("#table-canvas-0 tr").remove();
+  $("#table-canvas-1 tr").remove();
+  $("#table-animation tr").remove();
+  $("#txtarea-canvas-0").val("");
+  $("#txtarea-canvas-1").val("");
+}; // end function clearCanvas
+
+
+
+function initPixelMap(bmpWidth, bmpHeight, canvasNo, pixelMapStr = "") {
+  let initWith = [];
+  if (pixelMapStr == "") {
+    initWith[0] = 0;
+  } else {
+    initWith = pixelMapStr.trim().split(",");
+  }
+
+  pixelMap = [];
+  for (var i = 0; i < bmpHeight; i++) {
+    pixelMap[i] = [];
+    for (j = 0; j < bmpWidth; j++) {
+      pixelMap[i][j] = 2;
+      if (initWith.length == 1) {
+        pixelMap[i][j] = initWith[0];
+      } else {
+        pixelMap[i][j] = initWith[i].charAt(j + 2).trim();
+      }
+    }
+  }
+  // console.log(pixelMap);
+  pixelMaps[canvasNo] = pixelMap;
 }; // end function initPixelMap
 
-// for (k = 0; k < canvasCount; k++) {
-//   pixelMaps[k] = pixelMapArray;
-// }

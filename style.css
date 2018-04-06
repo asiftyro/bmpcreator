@@ -13,8 +13,11 @@ body {
 .divCanvasContainer {
     float: left;
     border: 1px dotted silver;
+    padding:5px; 
 }
-
+.divAnimationContainer {
+  display: none;
+}
 .tableCanvas{
   border-collapse: collapse;
 }
