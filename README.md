@@ -8,7 +8,8 @@ Supports:
 3. Binary code to BMP.
 4. BMP to Binary code.
 5. Edit two canvas at a time.
-4. Simple sprite animation (2 frames, 20fps).
+6. Encode to LCD bitmap format in Hex/Bin, with or without dimension info.
+7. Simple sprite animation (2 frames, 20fps).
 
 
 Setup: Download all the files in a directory. Open app.html with a browser.

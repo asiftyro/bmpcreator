@@ -10,6 +10,16 @@ let animationHandler;
 let animationCurrentFrame = 0;
 
 $(document).ready(function () {
+  $("#btnEncode-0").click(function () {
+    $("#txtarea-canvas-encoded-0").val("");
+    binArr = $("#txtarea-canvas-0").val().replace(/\n/g, "").replace(/0b/g, "").split(",");
+    let isDim = $('#chkIncludeDim-0').prop('checked');
+    let isHex = $('#chkValInHex-0').prop('checked');
+    let encString = encode(binArr, bmpWidth, bmpHeight, isDim, isHex);
+    $("#txtarea-canvas-encoded-0").val(encString);
+  });
+
+
 
   $("#btnAnimate").click(function () {
     if (!canvasCreated) {
@@ -65,7 +75,10 @@ $(document).ready(function () {
   $(".text-area-canvas").on("keyup", function () {
     textToPixMapArr(this.id);
     updateBmpCanvas(this.id.split("-")[2]);
+    $("#txtarea-canvas-encoded-0").val("");
   }); // end event keyup text-area-canvas
+  
+
 
 }); // end document ready
 
@@ -128,6 +141,7 @@ function updateBmpCodes(canvasId, className) {
   let x = pixelLabel[2];
   pixelMaps[canvasId][x][y] = pixelMaps[canvasId][x][y] == 1 ? 0 : 1;
   // console.log(pixelMaps[canvasId][x][y]);
+
 }; // end function updateBmpCodes
 
 // pixel map array to canvas table 
@@ -224,3 +238,35 @@ function initPixelMap(bmpWidth, bmpHeight, canvasNo, pixelMapStr = "") {
   pixelMaps[canvasNo] = pixelMap;
 }; // end function initPixelMap
 
+function encode(binaryArray, width, height, withDim, asHex) {
+  // console.log(binaryArray);
+  let iWidth = width;
+  let iHeight = height;
+  let rebin = "";
+  let out = ""
+  let noHorzByte = Math.ceil(iWidth / 8);
+  let noVertByte = iHeight;
+  for (let y = 0; y < noVertByte; y++) {
+    for (let x = 0; x < noHorzByte; x++) {
+      let curByteStartX = 8 * x;
+      rebin = "";
+      for (let curBitPos = 0; curBitPos < 8; curBitPos++) {
+        if (y < binaryArray.length && (curByteStartX + curBitPos) < binaryArray[y].length) {
+          rebin = rebin + "" + binaryArray[y][curByteStartX + curBitPos];
+        } else {
+          rebin = rebin + "" + "0"
+        }
+      } // next curBitPos
+      // console.log(rebin);
+      if (out != "") out = out + ",\n"
+      if (asHex) {
+        out = out + "0x" + parseInt(rebin, 2).toString(16);
+      } else { //asBin
+        out = out + "0b" + rebin;
+      } 
+    } // next x
+  } // next y
+  // console.log(out);
+  if (withDim) out = width + "," + height + "," + out;
+  return out;
+}; //end function encode
